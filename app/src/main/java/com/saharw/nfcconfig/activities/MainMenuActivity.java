@@ -3,7 +3,12 @@ package com.saharw.nfcconfig.activities;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
+import android.media.ExifInterface;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -18,6 +23,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.saharw.nfcconfig.R;
+import com.saharw.nfcconfig.Utils.FileExplorer;
 import com.saharw.nfcconfig.Utils.SharedPrefUtil;
 import com.saharw.nfcconfig.lists.ListItemConfig;
 import com.saharw.nfcconfig.lists.adapters.ConfigAdapter;
@@ -26,7 +32,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 
 public class MainMenuActivity extends ActionBarActivity implements View.OnClickListener, AdapterView.OnItemClickListener, DialogInterface.OnDismissListener {
@@ -35,6 +43,7 @@ public class MainMenuActivity extends ActionBarActivity implements View.OnClickL
     private static final String SHARED_PREF_FILENAME = "NfcConfigPref";
     private static final String JSON_KEY_CONFIG_NAME = "config_name";
     private static final String JSON_KEY_CONFIG_ICON_PATH = "config_icon_path";
+    private static final int KEY_ICON_PATH = 0;
 
     // UI Components
     private Button mBtnAdd, mBtnEdit;
@@ -79,7 +88,7 @@ public class MainMenuActivity extends ActionBarActivity implements View.OnClickL
 
                     //try create item from json
                     ListItemConfig itemConfig = new ListItemConfig(itemJson.getString(JSON_KEY_CONFIG_NAME),
-                            getBitmapFromPath(itemJson.getString(JSON_KEY_CONFIG_ICON_PATH)));
+                            tryReadImgFromPath(itemJson.getString(JSON_KEY_CONFIG_ICON_PATH)));
                     listItems.add(itemConfig);
                 } catch (JSONException e) {
                     Log.e(TAG, "unable to extract item #" + i);
@@ -87,11 +96,6 @@ public class MainMenuActivity extends ActionBarActivity implements View.OnClickL
             }
         }
         return listItems;
-    }
-
-    private Bitmap getBitmapFromPath(String string) {
-        //TODO: read bitmap using path
-        return null;
     }
 
     private void initUIComponents() {
@@ -209,11 +213,14 @@ public class MainMenuActivity extends ActionBarActivity implements View.OnClickL
     }
 
     private String getIconPath(ImageView configIcon) {
-        return null;
+        return (String) configIcon.getTag();
     }
 
     private void handleChooseIconClick() {
-
+        Log.d(TAG, "handleChooseIconClick");
+        Intent startFileExplorerActivity = new Intent(this, FileExplorer.class);
+        startFileExplorerActivity.putExtra(FileExplorer.KEY_REQ_CODE, FileExplorer.ACTION_PICK_ICON);
+        startActivityForResult(startFileExplorerActivity, FileExplorer.ACTION_PICK_ICON);
     }
 
     @Override
@@ -224,5 +231,78 @@ public class MainMenuActivity extends ActionBarActivity implements View.OnClickL
     @Override
     public void onDismiss(DialogInterface dialog) {
         populateList();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.d(TAG, "request code = " + requestCode + ", result code = " + resultCode);
+        String path = data.getStringExtra(FileExplorer.KEY_CHOSEN_FILE_PATH);
+        if(!TextUtils.isEmpty(path)){
+            Bitmap img = tryReadImgFromPath(path);
+            if(img != null){
+                mConfigIconImg.setImageBitmap(img);
+                mConfigIconImg.setTag(path);
+            }
+        }else{
+            Log.d(TAG, "chosen file path is empty");
+        }
+    }
+
+    private Bitmap tryReadImgFromPath(String path) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+        Bitmap bitmap = BitmapFactory.decodeFile(path, options);
+        if(bitmap != null) {
+            try {
+                ExifInterface exif = new ExifInterface(path);
+                int imgOrientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
+                if(imgOrientation != 1){
+                    Matrix matrix = new Matrix();
+                    switch (imgOrientation) {
+                        case 2:
+                            matrix.setScale(-1, 1);
+                            break;
+                        case 3:
+                            matrix.setRotate(180);
+                            break;
+                        case 4:
+                            matrix.setRotate(180);
+                            matrix.postScale(-1, 1);
+                            break;
+                        case 5:
+                            matrix.setRotate(90);
+                            matrix.postScale(-1, 1);
+                            break;
+                        case 6:
+                            matrix.setRotate(90);
+                            break;
+                        case 7:
+                            matrix.setRotate(-90);
+                            matrix.postScale(-1, 1);
+                            break;
+                        case 8:
+                            matrix.setRotate(-90);
+                            break;
+                        default:
+                            break;
+                    }
+                    try {
+                        Bitmap oriented = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
+                                bitmap.getHeight(), matrix, true);
+                        bitmap.recycle();
+                        return oriented;
+                    }catch (OutOfMemoryError e){
+                        e.printStackTrace();
+                        return bitmap;
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return bitmap;
+        }else{
+            return null;
+        }
     }
 }

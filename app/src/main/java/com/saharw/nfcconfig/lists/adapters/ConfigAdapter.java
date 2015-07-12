@@ -1,5 +1,6 @@
 package com.saharw.nfcconfig.lists.adapters;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -10,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.saharw.nfcconfig.R;
+import com.saharw.nfcconfig.Utils.DisplayHelper;
 import com.saharw.nfcconfig.lists.ListItemConfig;
 
 import java.util.ArrayList;
@@ -18,6 +20,7 @@ import java.util.ArrayList;
  * Created by sahar on 7/12/15.
  */
 public class ConfigAdapter extends ArrayAdapter<ListItemConfig> {
+    private static final int DP_ITEM_HEIGHT = 80;
     private final Activity mContext;
     private final ArrayList<ListItemConfig> mItems;
 
@@ -44,6 +47,7 @@ public class ConfigAdapter extends ArrayAdapter<ListItemConfig> {
         String s = item.mConfigName;
         holder.text.setText(s);
         holder.image.setImageBitmap(item.mConfigIcon);
+        rowView.setLayoutParams(new ActionBar.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) DisplayHelper.getPxFromDP(mContext, DP_ITEM_HEIGHT)));
         return rowView;
     }
 
