@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="main_menu_bkgd">#2d2d2d</color>
+    <color name="menu_header">#e6e7e7</color>
+    <color name="main_menu_sub_header">#00c5ff</color>
+    <color name="btn_add_config">#2274d0</color>
+    <color name="main_menu_btn">#2785db</color>
+    <color name="btn_add_config_text">#fffcbf</color>
+    <color name="btn_edit_list_text">#ffffff</color>
+    <color name="add_config_dialog_bkgd">#373b3e</color>
+    <color name="add_config_dialog_text">#EFE2E6</color>
+    <color name="edTxt_add_config_name">#CCCCE0</color>
+    <color name="add_config_btns">#6380A2</color>
+    <color name="list_item_bkgd">#ffffff</color>
+</resources>
