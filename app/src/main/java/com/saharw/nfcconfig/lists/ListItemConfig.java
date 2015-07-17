@@ -1,16 +1,14 @@
 package com.saharw.nfcconfig.lists;
 
-import android.graphics.Bitmap;
-
 /**
  * Created by sahar on 7/12/15.
  */
 public class ListItemConfig {
     public String mConfigName;
-    public Bitmap mConfigIcon;
+    public String mConfigIconPath;
 
-    public ListItemConfig(String configName, Bitmap configIcon){
+    public ListItemConfig(String configName, String configIconPath){
         this.mConfigName = configName;
-        this.mConfigIcon= configIcon;
+        this.mConfigIconPath = configIconPath;
     }
 }
