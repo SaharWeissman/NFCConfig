@@ -7,12 +7,12 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.graphics.drawable.BitmapDrawable;
 import android.media.ExifInterface;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,7 +24,9 @@ import android.widget.ListView;
 
 import com.saharw.nfcconfig.R;
 import com.saharw.nfcconfig.Utils.FileExplorer;
+import com.saharw.nfcconfig.Utils.ImageUtil;
 import com.saharw.nfcconfig.Utils.SharedPrefUtil;
+import com.saharw.nfcconfig.asyncTasks.DecodeBitmapAsync;
 import com.saharw.nfcconfig.lists.ListItemConfig;
 import com.saharw.nfcconfig.lists.adapters.ConfigAdapter;
 
@@ -34,7 +36,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.Logger;
+import java.util.concurrent.ExecutionException;
 
 
 public class MainMenuActivity extends ActionBarActivity implements View.OnClickListener, AdapterView.OnItemClickListener, DialogInterface.OnDismissListener {
@@ -88,7 +90,7 @@ public class MainMenuActivity extends ActionBarActivity implements View.OnClickL
 
                     //try create item from json
                     ListItemConfig itemConfig = new ListItemConfig(itemJson.getString(JSON_KEY_CONFIG_NAME),
-                            tryReadImgFromPath(itemJson.getString(JSON_KEY_CONFIG_ICON_PATH)));
+                            itemJson.getString(JSON_KEY_CONFIG_ICON_PATH));
                     listItems.add(itemConfig);
                 } catch (JSONException e) {
                     Log.e(TAG, "unable to extract item #" + i);
@@ -239,70 +241,20 @@ public class MainMenuActivity extends ActionBarActivity implements View.OnClickL
         Log.d(TAG, "request code = " + requestCode + ", result code = " + resultCode);
         String path = data.getStringExtra(FileExplorer.KEY_CHOSEN_FILE_PATH);
         if(!TextUtils.isEmpty(path)){
-            Bitmap img = tryReadImgFromPath(path);
-            if(img != null){
-                mConfigIconImg.setImageBitmap(img);
+            Bitmap imgBitmap = null;
+            try {
+                imgBitmap = new DecodeBitmapAsync().execute(path).get();
+            } catch (InterruptedException e) {
+                Log.e(TAG, "InterruptedException", e);
+            } catch (ExecutionException e) {
+                Log.e(TAG, "ExecutionException", e);
+            }
+            if(imgBitmap != null){
+                mConfigIconImg.setImageBitmap(imgBitmap);
                 mConfigIconImg.setTag(path);
             }
         }else{
             Log.d(TAG, "chosen file path is empty");
-        }
-    }
-
-    private Bitmap tryReadImgFromPath(String path) {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-        Bitmap bitmap = BitmapFactory.decodeFile(path, options);
-        if(bitmap != null) {
-            try {
-                ExifInterface exif = new ExifInterface(path);
-                int imgOrientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
-                if(imgOrientation != 1){
-                    Matrix matrix = new Matrix();
-                    switch (imgOrientation) {
-                        case 2:
-                            matrix.setScale(-1, 1);
-                            break;
-                        case 3:
-                            matrix.setRotate(180);
-                            break;
-                        case 4:
-                            matrix.setRotate(180);
-                            matrix.postScale(-1, 1);
-                            break;
-                        case 5:
-                            matrix.setRotate(90);
-                            matrix.postScale(-1, 1);
-                            break;
-                        case 6:
-                            matrix.setRotate(90);
-                            break;
-                        case 7:
-                            matrix.setRotate(-90);
-                            matrix.postScale(-1, 1);
-                            break;
-                        case 8:
-                            matrix.setRotate(-90);
-                            break;
-                        default:
-                            break;
-                    }
-                    try {
-                        Bitmap oriented = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
-                                bitmap.getHeight(), matrix, true);
-                        bitmap.recycle();
-                        return oriented;
-                    }catch (OutOfMemoryError e){
-                        e.printStackTrace();
-                        return bitmap;
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return bitmap;
-        }else{
-            return null;
         }
     }
 }
