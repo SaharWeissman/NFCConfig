@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.saharw.nfcconfig.R;
 import com.saharw.nfcconfig.Utils.ImageUtil;
 
 /**
@@ -24,7 +25,8 @@ public class DecodeBitmapAsync extends AsyncTask<String, Integer, Bitmap> {
         Log.d(TAG, "doInBackground: loading bitmap from path: " + params);
         Bitmap bitmap = ImageUtil.tryReadImgFromPath(params[0]);
         if(bitmap == null){
-            Log.d(TAG, "unable to read bitmap from: " + params[0]);
+            Log.d(TAG, "unable to read bitmap from: " + params[0] + ", display error image instead");
+            bitmap = ImageUtil.tryReadImgFromResource(R.drawable.error);
         }
         return bitmap;
     }
