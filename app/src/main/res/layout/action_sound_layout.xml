@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/main_menu_bkgd">
+
+    <RelativeLayout
+        android:id="@+id/relLay_set_sound"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/choose_sound_mode"
+            android:layout_width="fill_parent"
+            android:layout_height="48dp"
+            android:text="@string/action_set_sound"
+            android:textColor="@color/add_config_dialog_text"
+            android:textSize="16dp"
+            android:paddingTop="10dp"/>
+        <RadioButton
+            android:id="@+id/set_sound_item_1"
+            android:layout_below="@id/choose_sound_mode"
+            android:layout_width="fill_parent"
+            android:layout_height="48dp"
+            android:text="@string/set_sound_silent"
+            android:textSize="14dp"
+            android:textColor="@color/add_config_dialog_text"
+            android:textAlignment="center"/>
+        <RadioButton
+            android:id="@+id/set_sound_item_2"
+            android:layout_below="@id/set_sound_item_1"
+            android:layout_width="fill_parent"
+            android:layout_height="48dp"
+            android:text="@string/set_sound_cancel_silent"
+            android:textSize="14dp"
+            android:textColor="@color/add_config_dialog_text"
+            android:textAlignment="center"/>
+        <RadioButton
+            android:id="@+id/set_sound_item_3"
+            android:layout_below="@id/set_sound_item_2"
+            android:layout_width="fill_parent"
+            android:layout_height="48dp"
+            android:text="@string/set_sound_vibrate"
+            android:textSize="14dp"
+            android:textColor="@color/add_config_dialog_text"
+            android:textAlignment="center"/>
+    </RelativeLayout>
+</RelativeLayout>
