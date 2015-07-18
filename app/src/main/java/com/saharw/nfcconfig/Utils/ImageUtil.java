@@ -107,4 +107,30 @@ public class ImageUtil {
             return null;
         }
     }
+
+    public static Bitmap tryReadImgFromResource(int resID) {
+        Bitmap bitmap = null;
+        try {
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true; // don't really load bitmap just get width & height.
+            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+            bitmap = BitmapFactory.decodeResource(App.getAppContext().getResources(), resID);
+
+            // image view will be in fixed size
+            int imgViewWidth = App.getAppContext().getResources().getDisplayMetrics().widthPixels / 2;
+            int imgViewHeight = App.getAppContext().getResources().getDisplayMetrics().heightPixels / 7;
+
+            options.inSampleSize = ImageUtil.calcInSampleSize(options, imgViewWidth, imgViewHeight);
+            options.inJustDecodeBounds = false; //actually decode & load bitmap
+            bitmap = BitmapFactory.decodeResource(App.getAppContext().getResources(), resID);
+        }catch (Exception e){
+            Log.e(TAG, "caught exception when trying to decode bitmap", e);
+            bitmap = null;
+        }
+        if(bitmap != null) {
+            return bitmap;
+        }else{
+            return null;
+        }
+    }
 }

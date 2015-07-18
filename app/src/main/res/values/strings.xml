@@ -12,4 +12,8 @@
     <string name="add_config_subheader_icon">Config Icon:</string>
     <string name="save">Save</string>
     <string name="choose_icon">Choose Icon</string>
+    <string name="action_set_sound">Choose sound mode:</string>
+    <string name="set_sound_silent">silent</string>
+    <string name="set_sound_cancel_silent">cancel silent mode</string>
+    <string name="set_sound_vibrate">vibrate</string>
 </resources>
